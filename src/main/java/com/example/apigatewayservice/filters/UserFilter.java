@@ -72,11 +72,22 @@ public class UserFilter extends AbstractGatewayFilterFactory<Config> {
 			String pathString = request.getURI().getPath();
 			String[] extractPath = pathString.split("/");
 			System.out.println(extractPath[3]);
+
 			String pathId = extractPath[3];
 
+			// 은수 - user
 			if (pathId.equals("info")) {
+				System.out.println("유저 예외");
 				pathId = extractPath[2];
 			}
+
+			// 은수 - board
+			//pathId = extractPath[1];
+			if (extractPath[1].equals("user-boards")) {
+				System.out.println("보드");
+				pathId = extractPath[2];
+			}
+
 			System.out.println("pathId " + pathId);
 
 			// Request Header 에서 token 문자열 받아오기
@@ -127,7 +138,7 @@ public class UserFilter extends AbstractGatewayFilterFactory<Config> {
 	// }
 
 	public Mono<Void> onErrorResponse(ServerWebExchange exchange, int errorCode, String errorMsg) {
-		String errorcode = "{\"errorCode\":" + errorCode + ","
+		String errorcode = "{\"status\":" + "FAIL" + ","
 			+ "\"message\":" + "\"" + errorMsg + "\"" + "}";
 		byte[] bytes = errorcode.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
@@ -149,11 +160,18 @@ public class UserFilter extends AbstractGatewayFilterFactory<Config> {
 			System.out.println(subject);
 			System.out.println("==============");
 
+
+			// 토큰을 복호화 얻은 ID = URL ID
+
+			// 토큰 만료 , 토큰 정상
+
 			if (!subject.equals(pathId)) {
 				System.out.println("아이디 낫 매치");
 				return 902;
 				//return onErrorResponse(exchange, 901, "No Authorization header");
 			}
+
+
 
 		} catch (ExpiredJwtException e) {
 			return 903;
